@@ -1,5 +1,7 @@
 """
-Functions to handle JSON
+Functions to handle JSON.
+
+This is currently unused. But might use it later.
 """
 import json
 import types
