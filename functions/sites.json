@@ -1,0 +1,19 @@
+[{
+    "url": "http://www.mywifequitherjob.com/blog",
+    "filename": "mywifequit.html",
+    "directives": [
+        ["id", "content"],
+        "article",
+        "a"
+    ]
+  },
+  {
+    "url": "http://www.gizmodo.com",
+    "filename": "gizmo.html",
+    "directives": [
+        ["class", "content-meta__headline__wrapper"],
+        "h6",
+        "a"
+    ]
+  }
+]
