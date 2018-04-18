@@ -102,6 +102,3 @@ ENV/
 
 # PyCharm files
 .idea/
-
-# HTML files (which are used for caching when in testing mode)
-*.html

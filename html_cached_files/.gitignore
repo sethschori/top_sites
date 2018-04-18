@@ -1,0 +1,2 @@
+# ignore cached html files in the html_cached_files subdirectory
+*.html
