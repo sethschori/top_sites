@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
 # import html  # might need to use unescape()
 import json
+import re
 import requests
 import requests.exceptions as req_exc
 from error_handling import handle_error
-from json_functions import json_to_object
+# from json_functions import json_to_object
 
 
 class Site(object):
@@ -46,9 +47,30 @@ class Site(object):
             ))
         self.test_mode = True  # set testing mode; comment out to turn off
 
+        # Create Site's filename to be used for local caching if test_mode=True
+        self.filename = self.generate_filename()
+
         self.raw_html = self.get_site()  # get the raw HTML for site's url
-        soup = self.parse_site()  # parse raw HTML to find target <a> element
-        self.html_pair = soup['href'], soup.text  # save <a> as html_pair tuple
+        if self.raw_html is not None:
+            soup = self.parse_site()  # parse raw HTML to find target element
+            self.html_pair = soup['href'], soup.text  # save <a> as html_pair
+        else:
+            self.html_pair = None
+
+    def generate_filename(self):
+        """
+        Generate the filename to be used for local caching if test_mode = True.
+        :return: filename of type str, and ending in ".html"
+        """
+        url_split = self.url[self.url.find('://')+3:].split('/')
+        domain = '_'.join(str(url_split[0]).split('.'))
+        page = '-'.join(url_split[1:])
+        page = re.sub(r"[^a-zA-Z\d-]", "", page)
+        filename = '../html_cached_files/' + domain
+        if len(page) > 0:
+            filename += "-" + page
+        filename += ".html"
+        return filename
 
     def get_site(self):
         """
@@ -93,8 +115,12 @@ class Site(object):
             :return: doesn't return anything
             """
             response = request_site(url)
-            with open(filename, 'wb') as f:
-                f.write(response.content)
+            if response is not None:
+                with open(filename, 'wb') as f:
+                    f.write(response.content)
+                    return True
+            else:
+                return False
 
         # When not in testing mode, get the HTML of self.url and return it.
         if not self.test_mode:
@@ -105,9 +131,11 @@ class Site(object):
         # If it doesn't exist, save the HTML to local file and return it.
         try:
             return read_site_from_file(self.filename)
-        except:
-            save_site_to_file(self.filename, self.url)
-            return read_site_from_file(self.filename)
+        except FileNotFoundError:
+            site_html = save_site_to_file(self.filename, self.url)
+            if site_html:
+                return read_site_from_file(self.filename)
+            return None
 
     def parse_site(self):
         """
