@@ -1,0 +1,12 @@
+
+                    <tr class="sitesRow" data-rank="{rank}" data-title="{site.title}" data-latest-post="{site.data[scrape1][a_link_text][0][payload]}" data-tweets="{site.data[twitter1][tweets][0][payload]}" data-tweets-followers="{site.data[twitter1][tweets_followers][0][payload]}" data-most-followed-name="{site.data[twitter1][most_followed_name][0][payload]}" data-most-followed-count="{site.data[twitter1][most_followed_count][0][payload]}">
+                        <td class="siteCell siteRank">{rank}</td>
+                        <td class="siteCell siteLink"><a href="{site.url[full_url]}">{site.title}</a></td>
+                        <td class="siteCell siteLatestPost"><a href="{site.data[scrape1][a_link_url][0][payload]}">{site.data[scrape1][a_link_text][0][payload]}</a></td>
+                        <td class="siteCell siteMozrank">{site.data[moz1][mozrank][0][payload]}</td>
+                        <td class="siteCell siteAuthority">{site.data[moz1][authority][0][payload]}</td>
+                        <td class="siteCell siteTweets">{site.data[twitter1][tweets][0][payload]}</td>
+                        <td class="siteCell siteTweetsFollowers">{site.data[twitter1][tweets_followers][0][payload]:,}</td>
+                        <td class="siteCell siteTopTweeterName"><a href="https://twitter.com/{site.data[twitter1][most_followed_name][0][payload]}">@{site.data[twitter1][most_followed_name][0][payload]}</a></td>
+                        <td class="siteCell siteTopTweeterFollowers">{site.data[twitter1][most_followed_count][0][payload]:,}</td>
+                    </tr>

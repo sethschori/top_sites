@@ -1,0 +1,28 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <div>
+            <h2 id="my-sites">Sites</h2>
+            <table class="sitesTable">
+                <script type="text/javascript" src="sort_script.js"></script>
+                <thead>
+                    <tr class="sitesHeader">
+                        <td><button onclick="sortRows('data-rank')">Rank </button></td>
+                        <td><button onclick="sortRows('data-title')">Title</button></td>
+                        <td><button onclick="sortRows('data-latest-post')">Latest Post</button></td>
+                        <td><button onclick="sortRows('data-mozrank')">MozRank</button></td>
+                        <td><button onclick="sortRows('data-authority')">Moz Authority</button></td>
+                        <td><button onclick="sortRows('data-tweets')">Tweets Mentioning Site</button></td>
+                        <td><button onclick="sortRows('data-tweets-followers')">Tweets' Followers</button></td>
+                        <td><button onclick="sortRows('data-most-followed-name')">Most-Followed Tweeter</button></td>
+                        <td><button onclick="sortRows('data-most-followed-count')">Tweeter's Followers</button></td>
+                    </tr>
+                </thead>
+                <tbody data-sorted-by="data-rank">
+{table_rows}
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

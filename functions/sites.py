@@ -149,27 +149,24 @@ if __name__ == '__main__':
     with open('sites_new.json', 'r') as fo:
         sites_json = json.loads(fo.read())
 
+    # Turn the sites JSON into a list of Site objects.
     sites = load_sites(sites_json)
 
-    # For now, just print the site json. Later, we'll save back to database.
-    # for site_obj in sites:
-    #     print(json.dumps(site_obj.__dict__, indent=4, sort_keys=True))
-
+    # Format one copy of table_row.html per each Site object in sites and
+    # concatenate all of the table rows into table_rows_html.
     with open('../templates/table_row.html', 'r') as fo:
         site_template = fo.read()
-
-    all_sites_html = ''
-
+    table_rows_html = ''
     for position, site in enumerate(sites):
-        all_sites_html += site_template.format(site=site, rank=position + 1)
+        table_rows_html += site_template.format(site=site, rank=position + 1)
 
-    with open('../templates/doc_head.html', 'r') as fo:
-        html_page = fo.read()
-
+    # Then format sites.html by inserting all of the table rows into the
+    # appropriate place within sites.html.
     with open('../templates/sites.html', 'r') as fo:
-        table_html = fo.read()
+        html_page = fo.read()
+    html_page = html_page.format(table_rows=table_rows_html)
 
-    html_page += table_html.format(table_rows=all_sites_html)
-
+    # Finally, save html_page as index.html. Later, instead of saving this
+    # file locally, it will instead be uploaded to an S3 bucket/folder.
     with open('../output/index.html', 'w') as fo:
         fo.write(html_page)
