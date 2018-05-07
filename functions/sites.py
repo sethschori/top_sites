@@ -1,16 +1,18 @@
-from bs4 import BeautifulSoup
-# import html  # might need to use unescape()
+import datetime
 import json
-import re
-import requests
-import requests.exceptions as req_exc
+from data_functions import (prune_empty_branches, setup_data_branch,
+                            unpack_and_save_list)
 from error_handling import handle_error
+from html_parse import scrape_newest
 # from json_functions import json_to_object
+from moz import moz_search
+from twitter import twitter_search
+from url_functions import generate_filename, tidy_url
 
 
 class Site(object):
     """
-    Site class represents a website or blog.
+    Site represents a website or blog.
     When instantiating a Site object, the dict provided must contain following:
 
     1. directives: a list specifying the target element that is sought within
@@ -26,17 +28,19 @@ class Site(object):
 
     2. url: the url from which to retrieve HTML and parse it with the
     directives (see above).
-    
-    3. filename: if self.test_mode = True, then a filename must be specified of
-    where to locally save the retrieved HTML
     """
+    # def __getitem__(self, items):
+    #     print('{i}'.format(i=items))
+
     def __init__(self, site_dict):
         """
         Instantiate a Site object.
-        :param site_dict: a dict with Site's config details
+        :param site_dict: a dict with Site's existing config and data
         """
+        time_start = datetime.datetime.utcnow()
+        # Copy site_dict keys to Site keys.
         try:
-            self.__dict__.update(site_dict)  # copy site_dict keys to Site keys
+            self.__dict__.update(site_dict)
         except Exception as e:
             handle_error(
                 err=e,
@@ -47,130 +51,125 @@ class Site(object):
             ))
         self.test_mode = True  # set testing mode; comment out to turn off
 
+        # Clean and establish default self.url values if not already present.
+        self.url = tidy_url(self.url)
+
         # Create Site's filename to be used for local caching if test_mode=True
-        self.filename = self.generate_filename()
+        if self.test_mode:
+            self.url['filename'] = generate_filename(self.url)
 
-        self.raw_html = self.get_site()  # get the raw HTML for site's url
-        if self.raw_html is not None:
-            soup = self.parse_site()  # parse raw HTML to find target element
-            self.html_pair = soup['href'], soup.text  # save <a> as html_pair
-        else:
-            self.html_pair = None
-
-    def generate_filename(self):
-        """
-        Generate the filename to be used for local caching if test_mode = True.
-        :return: filename of type str, and ending in ".html"
-        """
-        url_split = self.url[self.url.find('://')+3:].split('/')
-        domain = '_'.join(str(url_split[0]).split('.'))
-        page = '-'.join(url_split[1:])
-        page = re.sub(r"[^a-zA-Z\d-]", "", page)
-        filename = '../html_cached_files/' + domain
-        if len(page) > 0:
-            filename += "-" + page
-        filename += ".html"
-        return filename
-
-    def get_site(self):
-        """
-        Retrieves a site webpage (specified in self.url) in HTML format.
-        :return: returns None if error; otherwise returns the raw HTML
-        """
-        def request_site(url):
-            """
-            Uses requests package to get HTML from url.
-            :param url: the url to request
-            :return: None if error; raw HTML as a byte string if no error.
-            """
-            try:
-                response = requests.get(url)
-            except req_exc.BaseHTTPError as e:
-                handle_error(
-                    exc=req_exc.BaseHTTPError,
-                    err=e
-                )
-                return None
-            if response.status_code != 200:
-                handle_error(
-                    msg='HTTP status code: {s}'.format(s=response.status_code)
-                )
-                return None
-            return response
-
-        def read_site_from_file(filename):
-            """
-            Helper function to return (HTML) contents stored in a file.
-            : param filename: file name to read from
-            :return: returns the file as a str
-            """
-            with open(filename, 'r') as f:
-                return f.read()
-
-        def save_site_to_file(filename, url):
-            """
-            Helper function to save retrieved HTML to a file.
-            :param filename: file name to save to
-            :param url: url to retrieve HTML from
-            :return: doesn't return anything
-            """
-            response = request_site(url)
-            if response is not None:
-                with open(filename, 'wb') as f:
-                    f.write(response.content)
-                    return True
-            else:
-                return False
-
-        # When not in testing mode, get the HTML of self.url and return it.
-        if not self.test_mode:
-            return request_site(self.url)
-
-        # When in testing mode, avoid repeated requests to self.url.
-        # Instead, get the HTML str from locally cached file if it exists.
-        # If it doesn't exist, save the HTML to local file and return it.
+        # Create data branch of Site if it doesn't already exist.
         try:
-            return read_site_from_file(self.filename)
-        except FileNotFoundError:
-            site_html = save_site_to_file(self.filename, self.url)
-            if site_html:
-                return read_site_from_file(self.filename)
-            return None
+            len(self.data)
+        except AttributeError:
+            self.data = {}
+        # Make sure all top-level keys within self.data are present
+        self.data = setup_data_branch(
+            data_dict=self.data,
+            directives_dict=self.directives
+        )
 
-    def parse_site(self):
-        """
-        Parses HTML str to find target element specified in self.directives.
-        :return: a BeautifulSoup object of the target element.
-        """
-        soup = BeautifulSoup(self.raw_html, 'html.parser')
+        # directives_map holds instructions of how to handle the different
+        # types of directives: which function to call and which parameters
+        # to pass to that function. This enables, below, to make a single loop
+        # through self.directives without using any if statements.
+        directives_map = {
+            'moz': {
+                'func': moz_search,
+                'params_to_pass': {
+                    'params': 'foo',
+                }
+            },
+            'scrape_newest': {
+                'func': scrape_newest,
+                'params_to_pass': {
+                    'url': self.url,
+                    'params': 'this will be replaced with params',
+                    'test_mode': self.test_mode
+                }
+            },
+            'twitter': {
+                'func': twitter_search,
+                'params_to_pass': {
+                    'params': 'this will be replaced with params',
+                }
+            }
+        }
 
+        # Follow all the directives (to scrape and ping apis) and save all
+        # the collected data into the proper locations within self.data
+        # TODO: handle errors here in case of incomplete/incorrect directives
         for directive in self.directives:
-            if isinstance(directive, list):
-                soup = soup.find(attrs={directive[0]: directive[1]})
-            else:
-                soup = soup.find(directive)
+            start_time = datetime.datetime.utcnow()
+            params = self.directives[directive]["parameters"]
+            # d_type points to the top-level key within directives_map (e.g.
+            # 'moz', 'twitter', 'scrape_newest')
+            d_type = self.directives[directive]['type']
+            # Save the relevant value from the "parameters" key in
+            # self.directives to the relevant 'params' key in directives_map.
+            directives_map[d_type]['params_to_pass']['params'] = params
+            # func is the function to be called
+            func = directives_map[d_type]['func']
+            # params_to_pass are the parameters to pass to func
+            params_to_pass = directives_map[d_type]['params_to_pass']
+            # Call func, passing in params_to_pass and start_time, which is
+            # used to calculate how long func took to run. response will be
+            # a list of dict(s).
+            response = func(**params_to_pass, start_time=start_time)
+            # Unpack the list of dicts(s) returned in response and save them
+            # to the relevant lists within self.data.
+            self.data = unpack_and_save_list(
+                list_of_dicts=response,
+                data_dict=self.data,
+                location=directive
+            )
 
-        return soup
+        # Remove any empty dict key/value pairs from self.data if they exist
+        self.data = prune_empty_branches(self.data)
+        time_end = datetime.datetime.utcnow()
+        self.elapsed_seconds = (time_end - time_start).total_seconds()
 
 
-with open('sites.json', 'r') as fo:
-    sites_json = json.loads(fo.read())
+def load_sites(sites_json_str):
+    """
+    Instantiate Site objects, including scraping and api calls.
+    :param sites_json_str: json representation of the sites
+    :return: 
+    """
+    site_objects = []
+    for site_json in sites_json_str:
+        try:
+            site = Site(site_json)
+        except ValueError as err:
+            handle_error(err=err)
+        site_objects.append(site)
+    return site_objects
 
-for site_json in sites_json:
-    try:
-        site = Site(site_json)
-        print(site.html_pair)
-    except ValueError as err:
-        handle_error(err=err)
+if __name__ == '__main__':
+    with open('sites_new.json', 'r') as fo:
+        sites_json = json.loads(fo.read())
 
+    sites = load_sites(sites_json)
 
-"""
-dynamo.py
-\ functions to interact with dynamo, using boto
-postgresql.py
-\ functions to interact with postgresql, using sqlalchemy
-publishing.py
-\ pelican functions to generate html, make & rsync to build and upload
-apis.py
-\ functions to interact with apis
-"""
+    # For now, just print the site json. Later, we'll save back to database.
+    # for site_obj in sites:
+    #     print(json.dumps(site_obj.__dict__, indent=4, sort_keys=True))
+
+    with open('../templates/table_row.html', 'r') as fo:
+        site_template = fo.read()
+
+    all_sites_html = ''
+
+    for position, site in enumerate(sites):
+        all_sites_html += site_template.format(site=site, rank=position + 1)
+
+    with open('../templates/doc_head.html', 'r') as fo:
+        html_page = fo.read()
+
+    with open('../templates/sites.html', 'r') as fo:
+        table_html = fo.read()
+
+    html_page += table_html.format(table_rows=all_sites_html)
+
+    with open('../output/index.html', 'w') as fo:
+        fo.write(html_page)
