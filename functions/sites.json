@@ -1,18 +1,192 @@
 [
   {
-    "url": "http://www.mywifequitherjob.com/blog",
-    "directives": [
-        ["id", "content"],
-        "article",
-        "a"
-    ]
+    "data": {
+      "scrape1": {
+        "a_link_text": [
+          {
+            "accessed": "2018-04-24T03:07:00+0000",
+            "data_name": "a_link_text",
+            "duration": "0:00:01.102656",
+            "payload": "Recap: Shareable's community workshop on urban villages in the Bay Area",
+            "result": "200 ok"
+          },
+          {
+            "accessed": "2018-04-23T03:07:00+0000",
+            "data_name": "a_link_text",
+            "duration": "0:00:01.102656",
+            "payload": "5 shared living ideas to counter rising housing costs",
+            "result": "200 ok"
+          },
+          {
+            "accessed": "2018-04-22T03:07:00+0000",
+            "data_name": "a_link_text",
+            "duration": "0:00:01.102656",
+            "payload": null,
+            "result": "500 gateway error"
+          },
+          {
+            "accessed": "2018-03-24T03:07:00+0000",
+            "data_name": "a_link_text",
+            "duration": "0:00:01.102656",
+            "payload": "title of article from 30 days ago",
+            "result": "200 ok"
+          }
+        ],
+        "a_link_url": [
+          {
+            "accessed": "2018-04-24T03:07:00+0000",
+            "data_name": "a_link_url",
+            "duration": "0:00:01.102656",
+            "payload": "/blog/recap-shareable-community-workshop-on-urban-villages-in-the-Bay-Area",
+            "result": "200 ok"
+          },
+          {
+            "accessed": "2018-04-23T03:07:00+0000",
+            "data_name": "a_link_url",
+            "duration": "0:00:01.102656",
+            "payload": "/blog/5-shared-living-ideas-to-counter-rising-housing-costs",
+            "result": "200 ok"
+          },
+          {
+            "accessed": "2018-04-22T03:07:00+0000",
+            "data_name": "a_link_url",
+            "duration": "0:00:01.102656",
+            "payload": null,
+            "result": "500 gateway error"
+          },
+          {
+            "accessed": "2018-03-24T03:07:00+0000",
+            "data_name": "a_link_url",
+            "duration": "0:00:01.102656",
+            "payload": "/article-from-30-days-ago",
+            "result": "200 ok"
+          }
+        ]
+      },
+      "twitter1": {
+        "tweets": [
+          {
+            "accessed": "2018-03-24T03:07:00+0000",
+            "data_name": "tweets",
+            "duration": "0:00:01.102656",
+            "payload": 28,
+            "result": "200 ok"
+          },
+          {
+            "accessed": "2018-03-23T03:07:00+0000",
+            "data_name": "tweets",
+            "duration": "0:00:01.102656",
+            "payload": 23,
+            "result": "200 ok"
+          }
+        ],
+        "tweets_followers": [
+          {
+            "accessed": "2018-03-24T03:07:00+0000",
+            "data_name": "tweets_followers",
+            "duration": "0:00:01.102656",
+            "payload": 60633,
+            "result": "200 ok"
+          },
+          {
+            "accessed": "2018-03-23T03:07:00+0000",
+            "data_name": "tweets_followers",
+            "duration": "0:00:01.102656",
+            "payload": 50500,
+            "result": "200 ok"
+          }
+        ]
+      }
+    },
+    "directives": {
+      "scrape1": {
+        "type": "scrape_newest",
+        "parameters": [
+          ["class", "views-row-1"],
+          ["class", "views-field-title"],
+          "a"
+        ]
+      },
+      "twitter1": {
+        "type": "twitter",
+        "parameters": [
+          "url:\"shareable net\"",
+          "-from:shareable"
+        ]
+      },
+      "moz1": {
+        "type": "moz",
+        "parameters": "shareable.net"
+      }
+    },
+    "project": "test_blogs",
+    "title": "Shareable",
+    "url": {
+      "protocol": "https://",
+      "subdomain": "www",
+      "domain": "shareable.net",
+      "path": "/"
+    }
   },
   {
-    "url": "http://www.gizmodo.com",
-    "directives": [
-        ["class", "content-meta__headline__wrapper"],
-        "h6",
-        "a"
-    ]
+    "directives": {
+      "scrape1": {
+        "type": "scrape_newest",
+        "parameters": [
+          ["id", "content"],
+          "article",
+          "a"
+        ]
+      },
+      "twitter1": {
+        "type": "twitter",
+        "parameters": [
+          "url:\"mywifequitherjob com\"",
+          "-from:mywifequit"
+        ]
+      },
+      "moz1": {
+        "type": "moz",
+        "parameters": "mywifequitherjob.com"
+      }
+    },
+    "project": "test_blogs",
+    "title": "My Wife Quit Her Job",
+    "url": {
+      "protocol": "https://",
+      "subdomain": "www",
+      "domain": "mywifequitherjob.com",
+      "path": "/blog"
+    }
+  },
+  {
+    "directives": {
+      "scrape1": {
+        "type": "scrape_newest",
+        "parameters": [
+          ["class", "public-article__title"],
+          "a"
+        ]
+      },
+      "twitter1": {
+        "type": "twitter",
+        "parameters": [
+          "url:\"recurse com\"",
+          "-from:recursecenter"
+        ]
+      },
+      "moz1": {
+        "type": "moz",
+        "parameters": "recurse.com"
+      }
+    },
+    "project": "test_blogs",
+    "title": "Recurse Center",
+    "url": {
+      "protocol": "https://",
+      "subdomain": "www",
+      "domain": "recurse.com",
+      "path": "/blog"
+    }
   }
 ]

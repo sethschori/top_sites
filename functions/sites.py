@@ -146,7 +146,7 @@ def load_sites(sites_json_str):
     return site_objects
 
 if __name__ == '__main__':
-    with open('sites_new.json', 'r') as fo:
+    with open('sites.json', 'r') as fo:
         sites_json = json.loads(fo.read())
 
     # Turn the sites JSON into a list of Site objects.
