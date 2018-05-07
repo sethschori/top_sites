@@ -20,7 +20,16 @@ def twitter_search(params, start_time):
         "url:\"gizmodo com\""
     in which the domain is separated by spaces instead of dots and the 
     internal quotes are escaped with backspaces.
-    :return: 
+    :return: Returns list of dicts containing:
+      - tweets: the number of tweets, since yesterday, about the specified
+      keywords (up to a maximum count of max_tweets)
+      - tweets_followers: the number of (unique) followers of those tweets
+      (i.e., if the same person tweets ten times in one day, that person's
+      followers are counted once, not ten times).
+      - most_followed_name: the name of the tweeter who tweeted in 'tweets'
+      (above) who has the most followers
+      - most_followed_count: the count of the number of followers who follow
+      the tweeter with the most followers
     """
     print('starting twitter_search')
     # Set up flow control variables.
