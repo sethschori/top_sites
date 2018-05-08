@@ -1,0 +1,75 @@
+# top_sites
+top_sites retrieves data about websites/blogs and publishes it all to static HTML files.
+
+The typical use case I envision is:
+
+- a set of ~100 blogs about a topic, e.g. entrepreneurship
+- Every day the blogs are ranked according to metrics retreieved from the [Moz API](https://moz.com/products/api) and [Twitter Search API](https://developer.twitter.com/en/docs/tweets/search/api-reference).
+  - The advantage of keeping the search set to ~100 blogs is that then one can easily use the free versions of the Moz and Twitter APIs.
+- A minimal set of metadata about the sites to be ranked is stored, as JSON, in DynamoDB. This includes:
+  - **scraping metadata** about how to find the most recent blog post on the site
+    - the example below finds the first `<a>` tag within the first occurrence of `class="public-article__title"`
+  - **twitter metadata** about which tweets should be counted
+    - the example below finds tweets referencing the [recurse.com](https://recurse.com) website, but not sent by [@recursecenter](http://www.twitter.com/recursecenter)
+  - **moz metadata** about which url to query
+    - the example below queries `recurse.com`
+  - **URL metadata** which breaks the URL down into its components (these could be parsed programmatically, however since the delineation of subdomain and domain might not always be rule-based, I chose to have the entire URL be human-parsed, at least for now)
+    - the example below uses `https://www.recurse.com/blog`
+  ```json
+  {
+    "directives": {
+      "scrape1": {
+        "type": "scrape_newest",
+        "parameters": [
+          ["class", "public-article__title"],
+          "a"
+        ]
+      },
+      "twitter1": {
+        "type": "twitter",
+        "parameters": [
+          "url:\"recurse com\"",
+          "-from:recursecenter"
+        ]
+      },
+      "moz1": {
+        "type": "moz",
+        "parameters": "recurse.com"
+      }
+    },
+    "project": "test_blogs",
+    "title": "Recurse Center",
+    "url": {
+      "protocol": "https://",
+      "subdomain": "www",
+      "domain": "recurse.com",
+      "path": "/blog"
+    }
+  }
+  ```
+- The retrieved data is then parsed and saved to static HTML files (hosted on AWS S3), as a table of data which can be sorted by any of the table's columns.
+- Finally, the data is saved as JSON back to DynamoDB.
+
+## Technology Stack
+top_sites is intended to be used with the following AWS technologies:
+- **EC2 instance**: to perform data retrieval and publish to static HTML
+- **DynamoDB**: database backend for the sites
+- **S3**: to serve static HTML files
+
+## Current Version
+The current version of top_sites is a work in progress. Here are details of where things are at:
+
+Feature | Status | Details
+:-: | :-: | :--
+web scraping | implemented | `scrape_newest` function scapes the newest blog post, as directed by metadata about the HTML tags and attributes which define how to find the most recent post
+Twitter search | implemented | `twitter_search` function uses the Twitter API to search for whichever keywords are specified (e.g. find tweets mentioning the blog's URL) since yesterday
+Moz | implemented | `moz_search` function uses the Moz 
+DynamoDB | not implemented | currently using `sites.json` file as a simple, local storage substitute for DynamoDB
+S3 | not implemented | currently outputting final HTML to `index.html` file
+
+## How to Install
+```sh
+git clone https://github.com/sethschori/top_sites.git
+cd top_sites
+pip install .
+```
