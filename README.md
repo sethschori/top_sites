@@ -65,8 +65,8 @@ Feature | Status | Details
 web scraping | implemented | `scrape_newest` function scapes the newest blog post, as directed by metadata about the HTML tags and attributes which define how to find the most recent post
 Twitter search | implemented | `twitter_search` function uses the Twitter API to search for whichever keywords are specified (e.g. find tweets mentioning the blog's URL) since yesterday
 Moz | implemented | `moz_search` function uses the Moz 
-DynamoDB | not implemented | currently using `sites.json` file as a simple, local storage substitute for DynamoDB
-S3 | not implemented | currently outputting final HTML to `index.html` file
+DynamoDB | not (yet) implemented | currently using `sites.json` file as a simple, local storage substitute for DynamoDB
+S3 | not (yet) implemented | currently outputting final HTML to `index.html` file
 
 ## How to Install
 ```sh
