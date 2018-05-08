@@ -1,5 +1,5 @@
 # top_sites
-top_sites retrieves data about websites/blogs and publishes it all to static HTML files.
+**tldr; top_sites retrieves data about websites/blogs and publishes it all to static HTML files.**
 
 Here's how it works:
 
