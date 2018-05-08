@@ -1,11 +1,11 @@
 # top_sites
 top_sites retrieves data about websites/blogs and publishes it all to static HTML files.
 
-The typical use case I envision is:
+Here's how it works:
 
-- a set of ~100 blogs about a topic, e.g. entrepreneurship
+- Determine a set of ~100 blogs about a topic (e.g. entrepreneurship or coding) which should be ranked.
 - Every day the blogs are ranked according to metrics retreieved from the [Moz API](https://moz.com/products/api) and [Twitter Search API](https://developer.twitter.com/en/docs/tweets/search/api-reference).
-  - The advantage of keeping the search set to ~100 blogs is that then one can easily use the free versions of the Moz and Twitter APIs.
+  - The advantage of keeping the search set to ~100 blogs is that one can easily fall within the limits of the free versions of the Moz and Twitter APIs.
 - A minimal set of metadata about the sites to be ranked is stored, as JSON, in DynamoDB. This includes:
   - **scraping metadata** about how to find the most recent blog post on the site
     - the example below finds the first `<a>` tag within the first occurrence of `class="public-article__title"`
