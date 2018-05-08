@@ -47,7 +47,8 @@ The typical use case I envision is:
     }
   }
   ```
-- The retrieved data is then parsed and saved to static HTML files (hosted on AWS S3), as a table of data which can be sorted by any of the table's columns.
+- The retrieved data is then parsed and saved to static HTML files (hosted on AWS S3), as a table of data which can be sorted by any of the table's columns. This screenshot shows an unstyled presentation of the data.
+![index_html_screenshot](https://user-images.githubusercontent.com/20755795/39737500-79c887a6-5253-11e8-8c9c-feaebe9dd828.png)
 - Finally, the data is saved as JSON back to DynamoDB.
 
 ## Technology Stack
