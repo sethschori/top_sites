@@ -49,7 +49,7 @@ class Site(object):
             raise ValueError('could not create Site with JSON: {j}'.format(
                 j=site_dict
             ))
-        self.test_mode = True  # set testing mode; comment out to turn off
+        self.test_mode = True  # test_mode caches HTML; False means don't cache
 
         # Clean and establish default self.url values if not already present.
         self.url = tidy_url(self.url)
