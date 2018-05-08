@@ -1,5 +1,5 @@
 # top_sites
-**tldr; top_sites retrieves data about websites/blogs and publishes it all to static HTML files.**
+**tldr; top_sites retrieves data about websites/blogs and publishes it to a static HTML file hosted on AWS S3.**
 
 Here's how it works:
 
