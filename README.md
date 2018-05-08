@@ -5,7 +5,7 @@ Here's how it works:
 
 - You pick a set of blogs about a topic (e.g. entrepreneurship or coding) which you want to be tracked and ranked daily for their popularity.
 - Every day the blogs are ranked according to metrics retreieved from the [Moz API](https://moz.com/products/api) and [Twitter Search API](https://developer.twitter.com/en/docs/tweets/search/api-reference).
-  - If you keep the set of blogs at ~100, you can keep within the limits of the free versions of the Moz and Twitter APIs, and within an hour or two of runtime on an AWS EC2 instance, which should cost $1.50 - $3.00 per day. (I haven't tested the actual AWS costs yet, so YMMV.)
+  - If you keep the set of blogs at ~100, you can keep within the limits of the free versions of the Moz and Twitter APIs, and within an hour or two of runtime on an AWS EC2 instance, which should cost $1.50 - $3.00 per month. (I haven't tested the actual AWS costs yet, so YMMV.)
 - A minimal set of metadata about the sites to be ranked is stored, as JSON, in DynamoDB. This includes:
   - **scraping metadata** about how to find the most recent blog post on the site
     - the example below finds the first `<a>` tag within the first occurrence of `class="public-article__title"`
