@@ -1,7 +1,9 @@
 import datetime
+from decimal import Decimal
 import json
 from data_functions import (prune_empty_branches, setup_data_branch,
                             unpack_and_save_list)
+from dynamodb import Dynamo
 from error_handling import handle_error
 from html_parse import scrape_newest
 # from json_functions import json_to_object
@@ -49,7 +51,7 @@ class Site(object):
             raise ValueError('could not create Site with JSON: {j}'.format(
                 j=site_dict
             ))
-        self.test_mode = True  # test_mode caches HTML; False means don't cache
+        self.test_mode = False  # test_mode caches HTML; False means no cache
 
         # Clean and establish default self.url values if not already present.
         self.url = tidy_url(self.url)
@@ -77,7 +79,7 @@ class Site(object):
             'moz': {
                 'func': moz_search,
                 'params_to_pass': {
-                    'params': 'foo',
+                    'params': 'this will be replaced with params',
                 }
             },
             'scrape_newest': {
@@ -124,33 +126,42 @@ class Site(object):
                 location=directive
             )
 
-        # Remove any empty dict key/value pairs from self.data if they exist
+        # Remove any empty dict key/value pairs from self.data if they
+        # exist. This is needed because DynamoDB can't save empty strings
+        # as dict values.
         self.data = prune_empty_branches(self.data)
         time_end = datetime.datetime.utcnow()
-        self.elapsed_seconds = (time_end - time_start).total_seconds()
+        self.elapsed_seconds = Decimal(
+            str((time_end - time_start).total_seconds())
+        )
 
 
-def load_sites(sites_json_str):
+def load_sites(dynamo_session):
     """
-    Instantiate Site objects, including scraping and api calls.
-    :param sites_json_str: json representation of the sites
-    :return: 
+    Load Dynamo data and instantiate site objects (with scraping & api calls).
+    :param site_items: sites as a list of dicts
+    :param dynamo_session: a session (connection) to DynamoDB
+    :return: a list of site objects.
     """
     site_objects = []
-    for site_json in sites_json_str:
+    items = dynamo_session.get_all_rows(
+        table_name='sites'
+    )
+    # Turn the DynamoDB rows about the sites into a list of Site objects.
+    for item in items:
         try:
-            site = Site(site_json)
+            site_obj = Site(item)
         except ValueError as err:
             handle_error(err=err)
-        site_objects.append(site)
+        site_objects.append(site_obj)
     return site_objects
 
+# TODO: Move the lines below (for '__main__') to 1 or 2 functions.
 if __name__ == '__main__':
-    with open('sites.json', 'r') as fo:
-        sites_json = json.loads(fo.read())
-
-    # Turn the sites JSON into a list of Site objects.
-    sites = load_sites(sites_json)
+    dynamo = Dynamo(
+        profile_name='top-sites'
+    )
+    sites = load_sites(dynamo)
 
     # Format one copy of table_row.html per each Site object in sites and
     # concatenate all of the table rows into table_rows_html.
@@ -164,9 +175,18 @@ if __name__ == '__main__':
     # appropriate place within sites.html.
     with open('../templates/sites.html', 'r') as fo:
         html_page = fo.read()
-    html_page = html_page.format(table_rows=table_rows_html)
+    now = datetime.datetime.utcnow().strftime(
+        '%A %B %-d, %Y at %-I:%M %p GMT (UTC)'
+    )
+    html_page = html_page.format(table_rows=table_rows_html, last_updated=now)
 
     # Finally, save html_page as index.html. Later, instead of saving this
     # file locally, it will instead be uploaded to an S3 bucket/folder.
     with open('../output/index.html', 'w') as fo:
         fo.write(html_page)
+
+    # Write the site objects back to DynamoDB
+    result = dynamo.batch_update_rows(
+        table_name='sites',
+        items=sites
+    )
