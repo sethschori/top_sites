@@ -2,6 +2,7 @@
 Functions that operate on data structures used within this package.
 """
 import datetime
+from decimal import Decimal
 
 
 def make_dict(value, data_name, start_time, status='ok'):
@@ -17,7 +18,9 @@ def make_dict(value, data_name, start_time, status='ok'):
     exception when attempting to retrieve this value
     :return: a standard-formatted dict used within this package
     """
-    duration = (datetime.datetime.utcnow() - start_time).total_seconds()
+    duration = Decimal(
+        str((datetime.datetime.utcnow() - start_time).total_seconds())
+    )
     formatted_dict = {
         'accessed': datetime.datetime.utcnow().strftime(
             '%Y-%m-%dT%H:%M:%S%z'
@@ -60,7 +63,6 @@ def unpack_and_save_list(list_of_dicts, data_dict, location):
             data_subbranch[data_name] = []
             target_list = data_subbranch[data_name]
         if len(target_list) > max_to_keep - 1:
-            # TODO: I think I have this backwards. Check and fix.
             sliced_dict = target_list[max_to_keep - 1:]
             target_list = target_list[:max_to_keep - 1]
             print('sliced_dict:', sliced_dict)
