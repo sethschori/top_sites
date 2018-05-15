@@ -23,7 +23,7 @@ def scrape_newest(url, params, test_mode, start_time):
     if not test_mode:
         # When not in testing mode, get the HTML of url.
         try:
-            raw_html = request_site(url)
+            raw_html = request_site(url['full_url']).content
         except ValueError as e:
             error = e
             raw_html = None
@@ -68,7 +68,7 @@ def scrape_newest(url, params, test_mode, start_time):
         error = format_exception(ValueError, error, error.__traceback__)
 
     a_link_text = make_dict(
-        value=escape(a_link_text, True),
+        value=escape(a_link_text, quote=True),
         data_name='a_link_text',
         start_time=start_time,
         status=error
