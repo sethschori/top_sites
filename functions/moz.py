@@ -2,6 +2,7 @@
 Functions for querying the moz api.
 """
 import base64
+from decimal import Decimal
 import hashlib
 import hmac
 import requests
@@ -181,14 +182,18 @@ def moz_search(params, start_time):
 
     # Take the larger value of authority_domain or authority_page and of
     # mozrank_url or mozrank_subdomain.
-    authority = max(
+    authority = Decimal(
+        str(
+            max(
         response_rekeyed['authority_domain'],
         response_rekeyed['authority_page']
-    )
-    mozrank = max(
+    )))
+    mozrank = Decimal(
+        str(
+            max(
         response_rekeyed['mozrank_url'],
         response_rekeyed['mozrank_subdomain']
-    )
+    )))
 
     mozrank = make_dict(
         value=mozrank,

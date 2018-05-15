@@ -105,3 +105,6 @@ ENV/
 
 # Ignore files in credentials folder
 credentials/
+
+# Ignore index.html in output folder because it's final output data that's client-generated
+output/index.html
