@@ -8,6 +8,7 @@ from error_handling import handle_error
 from html_parse import scrape_newest
 # from json_functions import json_to_object
 from moz import moz_search
+from s3 import S3
 from twitter import twitter_search
 from url_functions import generate_filename, tidy_url
 
@@ -184,6 +185,11 @@ if __name__ == '__main__':
     # file locally, it will instead be uploaded to an S3 bucket/folder.
     with open('../output/index.html', 'w') as fo:
         fo.write(html_page)
+
+    # Upload file to S3
+    s3 = S3()
+    result = s3.upload_file_public_read(file='foo')
+    print(result)
 
     # Write the site objects back to DynamoDB
     result = dynamo.batch_update_rows(
