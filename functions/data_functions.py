@@ -73,19 +73,13 @@ def unpack_and_save_list(list_of_dicts, data_dict, location):
 
 def prune_empty_branches(data_dict):
     """
-    Deletes key/value pairs from dict in which value is empty dict.
+    Non-recursively deletes key/val pairs from data_dict when val is empty dict
     The use case for this function in this package is that AWS's DynamoDB
     doesn't permit storage of key/value pairs where the value is empty.
     :param data_dict: a data structure dict from database
     :return: "pruned" data_structure as a dict
     """
-    branches_to_prune = []  # list of keys to del post-iterate data_dict
-    for branch in data_dict:
-        if not data_dict[branch]:  # empty dicts evaluate to False
-            branches_to_prune.append(str(branch))
-    for branch_to_prune in branches_to_prune:
-        del data_dict[branch_to_prune]  # delete the key/value pair
-    return data_dict
+    return {key: value for key, value in data_dict.items() if value != {}}
 
 
 def setup_data_branch(data_dict, directives_dict):
